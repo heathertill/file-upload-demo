@@ -1,11 +1,15 @@
 import * as React from 'react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+
 
 export interface AppProps { }
 
 const App: React.SFC<AppProps> = (props) => {
 
     const fileInput = useRef<HTMLInputElement>();
+
+    const [file, setFile] = useState();
+    const [show, setShow] = useState(false)
 
     const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -14,11 +18,30 @@ const App: React.SFC<AppProps> = (props) => {
         data.append('title', 'Test blog title');
         data.append('content', 'lorem ipsum blah blah');
         data.append('blogImage', fileInput.current.files[0]);
-        await fetch('/api/blogs', {
+        let result = await fetch('/api/blogs', {
             method: 'POST',
             body: data
         });
+        // console.log('result', result)
+        // console.log('data', data)
+        if (result) {
+            setShow(true)
+            setFile(`https://heathers-projects.s3.amazonaws.com/fileUploadDemo-${fileInput.current.files[0].name}`)
+            // console.log('file', file)
+        }
     }
+
+    const showImage = () => {
+        if (show === true) {
+            return (
+                <div className="col-md-12">
+                    <img src={`https://heathers-projects.s3.us-east-2.amazonaws.com/fileUploadDemo-${fileInput.current.files[0].name}`} alt="test" id="test" />
+                </div>
+            )
+        }
+    }
+
+
 
     return (
         <main className="container">
@@ -30,9 +53,10 @@ const App: React.SFC<AppProps> = (props) => {
                         <button onClick={handleClick} className="btn btn-primary w-75 mx-auto mt-3 shadow">Submit</button>
                     </form>
                 </div>
-                <div className="col-md-12">
-                    <img src="https://heathers-projects.s3.us-east-2.amazonaws.com/1574287088822-test.png" alt="test" id="test" />
-                </div>
+                {showImage()}
+                {/* <div className="col-md-12">
+                    <img src={`https://heathers-projects.s3.us-east-2.amazonaws.com/fileUploadDemo-${fileInput.current.files[0].name}`} alt="test" id="test" />
+                </div> */}
             </section>
         </main>
     );
